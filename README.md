@@ -16,4 +16,5 @@ GDB is an assembly de bugging tool. <br>
 In this lab we used code given to us and looked through it using GDB to learn the commands and what it can do.
 
 ### Lab4 (User input)
-This lab is to learn more indepth how to take user input. <br>
+This lab is to learn more indepth how to take user input and how to add and subract. <br>
+we took user input of two numbers then converted them from strings to integers, We then added and substracted them and displayed them to the users.
