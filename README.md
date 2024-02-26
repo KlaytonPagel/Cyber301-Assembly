@@ -18,3 +18,7 @@ In this lab we used code given to us and looked through it using GDB to learn th
 ### Lab4 (User input)
 This lab is to learn more indepth how to take user input and how to add and subract. <br>
 we took user input of two numbers then converted them from strings to integers, We then added and substracted them and displayed them to the users.
+
+### Lab 5 (Loops & Lables)
+This lab we used labels and jump calls to make loops.
+We make acumulating loops counting or adding for each iteration of the loop.
