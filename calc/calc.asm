@@ -134,8 +134,17 @@ sub_input:
 
 ; mutliplies the user inputs together----------------------------------------------------------------------------------
 mult_input:
+    mov rcx, [val1]
+    xor rax, rax
 
-    ret
+    multiply:
+        add rax, [val2]
+        dec rcx
+        cmp rcx, 0
+        jg multiply
+        mov [total], rax
+
+        ret
 
 ; divides the user inputs together-------------------------------------------------------------------------------------
 div_input:
