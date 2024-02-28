@@ -105,6 +105,12 @@ check_operator:
     mov rax, [operator]
     cmp rax, '+'
     jz add_input
+    cmp rax, '-'
+    jz sub_input
+    cmp rax, '*'
+    jz mult_input
+    cmp rax, '/'
+    jz div_input
     
     ret
 
@@ -116,6 +122,24 @@ add_input:
 
     
     
+    ret
+
+; subtracts the user inputs together-----------------------------------------------------------------------------------
+sub_input:
+    mov rax, [val1]
+    sub rax, [val2]
+    mov [total], rax
+
+    ret
+
+; mutliplies the user inputs together----------------------------------------------------------------------------------
+mult_input:
+
+    ret
+
+; divides the user inputs together-------------------------------------------------------------------------------------
+div_input:
+
     ret
 
 
