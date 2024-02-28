@@ -148,8 +148,19 @@ mult_input:
 
 ; divides the user inputs together-------------------------------------------------------------------------------------
 div_input:
+    mov rcx, [val1]
+    xor rax, rax
+    cmp rcx, [val2]
+    jg divide
+    
+    divide:
+        inc rax
+        sub rcx, [val2]
+        cmp rcx, [val2]
+        jg divide
 
-    ret
+        mov [total], rax
+        ret
 
 
 
