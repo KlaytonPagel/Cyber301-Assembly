@@ -24,6 +24,7 @@ segment .bss
 val1 resb 32
 operator resb 32
 val2 resb 32
+total resb 32
 
 ;======================================================================================================================
 segment .text
@@ -42,9 +43,10 @@ asm_main:
         mov rax, [val2]
         call print_int
         
-        mov rax, operator
-        mov rdx, 32
-        call print_string
+        call check_operator
+
+        mov rax, [total]
+        call print_int
 
 	
 	    ;***************CODE ENDS HERE*****************************
@@ -98,8 +100,23 @@ initial_setup:
 
     ret
     
+; Checks what operator the user used and jumps to respective procedure-------------------------------------------------
+check_operator:
+    mov rax, [operator]
+    cmp rax, '+'
+    jz add_input
+    
+    ret
 
+; adds the user inputs together----------------------------------------------------------------------------------------
+add_input:
+    mov rax, [val1]
+    add rax, [val2]
+    mov [total], rax
 
+    
+    
+    ret
 
 
 
