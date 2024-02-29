@@ -134,33 +134,21 @@ sub_input:
 
 ; mutliplies the user inputs together----------------------------------------------------------------------------------
 mult_input:
-    mov rcx, [val1]
-    xor rax, rax
+    mov rax, [val1]
+    mov rcx, [val2]
+    mul rcx
+    mov [total], rax
 
-    multiply:
-        add rax, [val2]
-        dec rcx
-        cmp rcx, 0
-        jg multiply
-        mov [total], rax
-
-        ret
+    ret
 
 ; divides the user inputs together-------------------------------------------------------------------------------------
 div_input:
-    mov rcx, [val1]
-    xor rax, rax
-    cmp rcx, [val2]
-    jg divide
-    
-    divide:
-        inc rax
-        sub rcx, [val2]
-        cmp rcx, [val2]
-        jg divide
+    mov rax, [val1]
+    mov rcx, [val2]
+    div rcx
+    mov [total], rax
 
-        mov [total], rax
-        ret
+    ret
 
 
 
