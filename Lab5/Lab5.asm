@@ -153,7 +153,7 @@ dec_loop:
     pop rcx
 
     dec rcx
-    cmp rcx, 0
+    cmp rcx, 1
     jg dec_loop
 
     ret
