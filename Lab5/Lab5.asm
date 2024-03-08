@@ -71,6 +71,10 @@ asm_main:
         call inc_loop
         call print_int
 
+        ; Runs other dec loop--------------------------------------------------
+        mov rcx, 10
+        xor rax, rax
+        call dec_loop
 	
 	    ;***************CODE ENDS HERE*****************************
         
@@ -140,7 +144,19 @@ inc_loop:
     mov rax, rbx
     ret
 
+dec_loop:
+    push rcx
 
+    mov rax, rcx
+    call print_int
+    
+    pop rcx
+
+    dec rcx
+    cmp rcx, 0
+    jg dec_loop
+
+    ret
 
 
 
