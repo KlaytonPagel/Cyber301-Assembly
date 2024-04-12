@@ -166,7 +166,6 @@ getArrayNumberInput:
     ;-----Take user input--------------
     mov rax, address
     call read_input
-    mov [address], rax
 
     ;-----Convert to integer-----------
     mov rax, address
@@ -193,7 +192,6 @@ getOffsetInput:
     ;-----Take user input--------------
     mov rax, offset
     call read_input
-    mov [offset], rax
 
     ;-----Convert to integer-----------
     mov rax, offset
@@ -220,7 +218,6 @@ getSizeInput:
     ;-----Take user input--------------
     mov rax, size
     call read_input
-    mov [size], rax
 
     ;-----Convert to integer-----------
     mov rax, size
@@ -257,7 +254,69 @@ three:
 
 
 done:
+
+    mov rax, [size]
+    cmp rax, 2
+    jl b
+    jz w
+    jmp d
+
+b:
+
+    call correct_address
+    call print_address
+    
+    mov rbx, [address]
+    movzx rax, BYTE [rbx]
+    
+    call print_int
+
+    jmp finish
+
+w:
+
+    call correct_address
+    call print_address
+    
+    mov rbx, [address]
+    movzx rax, WORD [rbx]
+    
+    call print_int
+
+    jmp finish
+
+d:
+
+    call correct_address
+    call print_address
+    
+    mov rbx, [address]
+    mov eax, DWORD [rbx]
+    
+    call print_int
+
+    jmp finish
+
+
+
+finish:
         
         mov	rax, 0           ; return back to C
        	pop	rbp               
         ret
+
+correct_address:
+
+    mov rax, [offset]
+    mov rbx, [size]
+    mul rbx
+    add rcx, rax
+    mov [address], rcx
+
+    mov rax, newaddrprompt
+    mov rdx, newaddrpromptlen
+    call print_string
+
+    mov rax, [address]
+
+    ret
