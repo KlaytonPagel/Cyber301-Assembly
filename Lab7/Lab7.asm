@@ -52,7 +52,14 @@ asm_main:
 	    
         ;***************CODE STARTS HERE***************************
 		
-        
+        push input1prompt
+        push input1promptlen
+        push input1
+        call get_input
+        add rsp, 3*8
+
+        mov rax, [input1]
+        call print_int
 
 	
 	    ;***************CODE ENDS HERE*****************************
@@ -76,7 +83,7 @@ done:
 
 ;--------Take user input-------------------------------------------------------
 
-get_input1:
+get_input:
     ; Create a new stack for the method--------------------
     push rbp
     mov rbp, rsp
@@ -86,12 +93,18 @@ get_input1:
     mov rdx, [rbp+24] ; Length of the prompt
     mov rax, [rbp+32] ; prompt string to be printed out
 
-    ; Print out the prmpt----------------------------------
+    ; Print out the prompt---------------------------------
     call print_string
 
+    ; Capture User Input-----------------------------------
     mov rax, rbx
     call read_input
-    mov, 
+    mov rax, rbx
+
+    ; Convert user input to an integer---------------------
+    call to_int 
+    mov rbx, [rbp+16]
+    mov [rbx], rax
 
     ; Exit the method by removing the new stack------------
     mov rsp, rbp
