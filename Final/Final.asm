@@ -11,8 +11,28 @@ segment .data
 ;--------Prompts-----------------------------------------------------------------------------------
 
 ;----Welcome prompt and length----
-welcome_prompt db "Welcome to Klaytons 301 Final Game! This is a two player turn based fighting game. Two players will take turns making an attack until one player falls. Type play to begin", 10, 0
-welcome_prompt_len equ $ - welcome_prompt
+welcome_prompt1 db "Welcome to Klaytons 301 Final Game!", 10, 0
+welcome_prompt1_len equ $ - welcome_prompt1
+
+;----Help Prompts--------
+help_prompt1 db "This is a two player turn based fighting game.", 10, 0
+help_prompt1_len equ $ - help_prompt1
+
+
+help_prompt2 db "Two players will take turns making an attack until one player falls.", 10, 0
+help_prompt2_len equ $ - help_prompt2
+
+
+help_prompt3 db "Attacking does your damage amount to the other player.", 10, 0
+help_prompt3_len equ $ - help_prompt3
+
+
+help_prompt4 db "Health potions double your current health, but won't go above 100.", 10, 0
+help_prompt4_len equ $ - help_prompt4
+
+
+help_prompt5 db "Strength potions triple your damage for one attack", 10, 0
+help_prompt5_len equ $ - help_prompt5
 
 
 ;----screen seperator----
@@ -40,9 +60,29 @@ play2_h_label db "Player 2 health:", 0
 play2_h_label_len equ $ - play2_h_label
 
 
+;----incorrect response label----
+incorrect db "Invalid Response", 10, 0
+incorrect_len equ $ - incorrect
+
+
 ;----select option prompt----
 choose_option db "Please select from the following options:", 10, 0
 choose_option_len equ $ - choose_option
+
+
+;----player one wins----
+play1_wins db "Player one wins!", 10, 0
+play1_wins_len equ $ - play1_wins
+
+
+;----player two wins----
+play2_wins db "Player two wins!", 10, 0
+play2_wins_len equ $ - play2_wins
+
+
+;----play again prompt----
+play_again db "would you like to play again. yes/no", 10, 0
+play_again_len equ $ - play_again
 
 
 ;----Entry prompt----
@@ -54,14 +94,23 @@ entry_len equ $ - entry
 option1 db "1.  attack", 10, 0
 option1_len equ $ - option1
 
+option2 db "2.  drink health potion", 10, 0
+option2_len equ $ - option2
 
-;--------Player Stats------------------------------------------------------------------------------
-;----player one's health, damage----
-player1 dq 100, 10
+option3 db "3.  drink strength potion", 10, 0
+option3_len equ $ - option3
+
+option4 db "4.  help", 10, 0
+option4_len equ $ - option4
 
 
-;----player two's health, damage----
-player2 dq 100, 10
+;--------Player Stat arrays------------------------------------------------------------------------
+;----player one's health, damage, health potions, damage buffs----
+player1 dq 100, 10, 2, 2
+
+
+;----player two's health, damage, health potions, damage buffs----
+player2 dq 100, 10, 2, 2
 
 
 
@@ -106,10 +155,9 @@ asm_main:
         push	rbp	         ; setup routine
 	    
         ;***************CODE STARTS HERE***************************
-
+start:
         call set_player1
         call welcome
-        call check_start
         jmp player_screen
 	
 	    ;***************CODE ENDS HERE*****************************
@@ -123,47 +171,37 @@ finish:
 welcome:
 
     ;----Display string----
-    mov rax, welcome_prompt
-    mov rdx, welcome_prompt_len
+    mov rax, welcome_prompt1
+    mov rdx, welcome_prompt1_len
     call print_string
-
     ret
 
-;--------Check users play input to see if they are starting the game-------------------------------
-check_start:
-   
-    ;----Read Users input----
-    mov rax, play
-    call read_input
+;--------Displays help messages--------------------------------------------------------------------
+help:
 
-    ;----Check Users input----
-    mov rax, [play]
-    cmp rax, "play"
-
-    ret
-
-;--------Displays the players options--------------------------------------------------------------
-
-display_options:
-
-    ;----select option prompt---
-    mov rax, choose_option
-    mov rdx, choose_option_len
+    mov rax, seperator
+    mov rdx, seperator_len
     call print_string
 
-    ;----displays option 1----
-    mov rax, option1
-    mov rdx, option1_len
+    mov rax, help_prompt1
+    mov rdx, help_prompt1_len
     call print_string
 
-    ;----display the entry prompt----
-    mov rax, entry
-    mov rdx, entry_len
+    mov rax, help_prompt2
+    mov rdx, help_prompt2_len
     call print_string
 
-    ret
+    mov rax, help_prompt3
+    mov rdx, help_prompt3_len
+    call print_string
 
-;--------Screen for player one's turn--------------------------------------------------------------
+    mov rax, help_prompt4
+    mov rdx, help_prompt4_len
+    call print_string
+
+    jmp player_screen
+
+;--------Screen for players turn-------------------------------------------------------------------
 
 player_screen:
 
@@ -216,16 +254,53 @@ player_screen:
 
     cont_screen:
 
+    ;----print screen seperator----
+    mov rax, seperator
+    mov rdx, seperator_len
+    call print_string
+
     ;----display options----
     call display_options
 
     ;----decides based off of selected option----
-    call check_option
+    jmp check_option
 
-    jmp finish
+;--------Displays the players options--------------------------------------------------------------
+
+display_options:
+
+    ;----select option prompt---
+    mov rax, choose_option
+    mov rdx, choose_option_len
+    call print_string
+
+    ;----displays option 1----
+    mov rax, option1
+    mov rdx, option1_len
+    call print_string
+
+    ;----displays option 2----
+    mov rax, option2
+    mov rdx, option2_len
+    call print_string
+
+    ;----displays option 3----
+    mov rax, option3
+    mov rdx, option3_len
+    call print_string
+
+    ;----displays option 4----
+    mov rax, option4
+    mov rdx, option4_len
+    call print_string
 
 
+    ;----display the entry prompt----
+    mov rax, entry
+    mov rdx, entry_len
+    call print_string
 
+    ret
 
 ;--------Checked the players selected option and makes a decision----------------------------------
 
@@ -241,9 +316,17 @@ check_option:
     cmp rax, 1
     jz attack
 
-    jmp finish
+    ;----option 4 help----
+    cmp rax, 4
+    jz help
 
-;--------Gets the players selected option and converts it to an intiger----------------------------
+    ;----invalid option----
+    mov rax, incorrect
+    mov rdx, incorrect_len
+    call print_string
+    jmp player_screen
+
+;--------Gets the players selected option and converts it to an integer----------------------------
 
 get_option:
 
@@ -251,7 +334,7 @@ get_option:
     mov rax, option
     call read_input
 
-    ;----convert to intiger----
+    ;----convert to integer----
     mov rax, option
     call to_int
     mov [option], rax
@@ -358,6 +441,39 @@ switch_player:
     jz set_player2
     jmp set_player1
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;--------Checks if the player is dead, if not switch players and go back to screen-----------------
 check_dead:
 
@@ -377,11 +493,84 @@ check_dead:
 
     ;----if player one is dead----
     play1_dead:
-        jmp finish
+        mov rax, play2_wins
+        mov rdx, play2_wins_len
+        call print_string
+        jmp check_play_again
 
     ;----if player two is dead----
     play2_dead:
-        jmp finish
+        mov rax, play1_wins
+        mov rdx, play1_wins_len
+        call print_string
+        jmp check_play_again
+
+;--------checks if the player would like to play again then decides--------------------------------
+check_play_again:
+
+    ;----asks the player if they want to play again----
+    mov rax, play_again
+    mov rdx, play_again_len
+    call print_string
+
+    mov rax, entry
+    mov rdx, entry_len
+    call print_string
+
+    ;----Gets user input----
+    mov rax, option
+    call read_input
+
+    ;----check if yes----
+    mov rax, [option]
+    cmp rax, "yes"
+    jz restart
+
+    ;----check if no----
+    mov rax, [option]
+    cmp rax, "no"
+    jz finish
+
+    ;----if not yes or no----
+    mov rax, incorrect
+    mov rdx, incorrect_len
+    call print_string
+    jmp check_play_again
+
+;--------Sets player stats back and restarts the game----------------------------------------------
+restart:
+
+    ;----resets player one's health----
+    mov rax, player1
+    mov rdx, 100
+    mov [rax], rdx
+
+    ;----resets player two's health----
+    mov rax, player2
+    mov rdx, 100
+    mov [rax], rdx
+
+    ;----displays a few screen seperators----
+    mov rax, seperator
+    mov rdx, seperator_len
+    call print_string
+    call print_string
+    call print_string
+
+    jmp start
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
