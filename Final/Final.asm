@@ -51,13 +51,43 @@ play2_label_len equ $ - play2_label
 
 
 ;----Player one health label----
-play1_h_label db "Player 1 health:", 0
+play1_h_label db "Player 1 Health:", 0
 play1_h_label_len equ $ - play1_h_label
 
 
 ;----Player two health label----
-play2_h_label db "Player 2 health:", 0
+play2_h_label db "Player 2 Health:", 0
 play2_h_label_len equ $ - play2_h_label
+
+
+;----Player one damage label----
+play1_d_label db "         Damage:", 0
+play1_d_label_len equ $ - play1_d_label
+
+
+;----Player two damage label----
+play2_d_label db "         Damage:", 0
+play2_d_label_len equ $ - play2_d_label
+
+
+;----Player one health potion label----
+play1_hp_label db "         Health Potions:", 0
+play1_hp_label_len equ $ - play1_hp_label
+
+
+;----Player two health potion label----
+play2_hp_label db "         Health Potions:", 0
+play2_hp_label_len equ $ - play2_hp_label
+
+
+;----Player one strength potion label----
+play1_s_label db "         Strength Potions:", 0
+play1_s_label_len equ $ - play1_s_label
+
+
+;----Player two strength potion label----
+play2_s_label db "         Strength Potions:", 0
+play2_s_label_len equ $ - play2_s_label
 
 
 ;----incorrect response label----
@@ -68,6 +98,10 @@ incorrect_len equ $ - incorrect
 ;----select option prompt----
 choose_option db "Please select from the following options:", 10, 0
 choose_option_len equ $ - choose_option
+
+;----no potion available prompt----
+no_potion_prompt db "That potion is unavailable!!!", 10, 0
+no_potion_prompt_len equ $ - no_potion_prompt
 
 
 ;----player one wins----
@@ -218,12 +252,66 @@ player_screen:
     mov rax, [player1]
     call print_int
 
+    ;----print player one's damage----
+    mov rax, play1_d_label
+    mov rdx, play1_d_label_len
+    call print_string
+
+    call get_play1_damage
+    mov rax, [rdx]
+    call print_int
+
+    ;----print player one's health potion count----
+    mov rax, play1_hp_label
+    mov rdx, play1_hp_label_len
+    call print_string
+
+    call get_play1_health_pot
+    mov rax, [rdx]
+    call print_int
+
+    ;----print player one's strength potion count----
+    mov rax, play1_s_label
+    mov rdx, play1_s_label_len
+    call print_string
+
+    call get_play1_strength_pot
+    mov rax, [rdx]
+    call print_int
+
     ;----print player two's health----
     mov rax, play2_h_label
     mov rdx, play2_h_label_len
     call print_string
 
     mov rax, [player2]
+    call print_int
+
+    ;----print player two's damage----
+    mov rax, play2_d_label
+    mov rdx, play2_d_label_len
+    call print_string
+
+    call get_play2_damage
+    mov rax, [rdx]
+    call print_int
+
+    ;----print player two's health potion count----
+    mov rax, play2_hp_label
+    mov rdx, play2_hp_label_len
+    call print_string
+
+    call get_play2_health_pot
+    mov rax, [rdx]
+    call print_int
+
+    ;----print player two's strength potion count----
+    mov rax, play2_s_label
+    mov rdx, play2_s_label_len
+    call print_string
+
+    call get_play2_strength_pot
+    mov rax, [rdx]
     call print_int
 
     ;----print screen seperator----
@@ -316,6 +404,14 @@ check_option:
     cmp rax, 1
     jz attack
 
+    ;----option 2 health potion----
+    cmp rax, 2
+    jz drink_health
+
+    ;----option 3 health potion----
+    cmp rax, 3
+    jz drink_strength
+
     ;----option 4 help----
     cmp rax, 4
     jz help
@@ -352,16 +448,32 @@ attack:
     jz attack_play2
     jmp attack_play1
 
-    ;----uses player one's damage to attack player two----
+    ;----uses player two's damage to attack player one----
     attack_play1:
         call get_play2_damage
+        mov rax, [rdx]
+        mov rdx, rax
         call sub_play1_health
+
+    ;----set player two's damage to the default 10----
+        call get_play2_damage
+        mov rax, 10
+        mov [rdx], rax
+
         jmp check_dead
 
-    ;----uses player two's damage to attack player one----
+    ;----uses player one's damage to attack player two----
     attack_play2:
         call get_play1_damage
+        mov rax, [rdx]
+        mov rdx, rax
         call sub_play2_health
+
+    ;----set player one's damage to the default 10----
+        call get_play1_damage
+        mov rax, 10
+        mov [rdx], rax
+
         jmp check_dead
 
 ;--------decrease the players health---------------------------------------------------------------
@@ -382,7 +494,7 @@ sub_play2_health:
     ret
 
 ;--------Get the players damage--------------------------------------------------------------------
-;----!!!Stores the damage in RDX!!!----
+;----!!!Stores the address in RDX!!!----
 
 ;----Get player one's damage----
 get_play1_damage:  
@@ -391,7 +503,7 @@ get_play1_damage:
     mov rbx, 8
     mul rbx
     add rcx, rax
-    mov rdx, [rcx]
+    mov rdx, rcx
 
     ret
 
@@ -402,7 +514,57 @@ get_play2_damage:
     mov rbx, 8
     mul rbx
     add rcx, rax
-    mov rdx, [rcx]
+    mov rdx, rcx
+
+    ret
+
+;--------Get the players health potion count-------------------------------------------------------
+;----!!!Stores the address in RDX!!!----
+
+;----Get player one's health potion count----
+get_play1_health_pot:  
+    mov rcx, player1
+    mov rax, 2
+    mov rbx, 8
+    mul rbx
+    add rcx, rax
+    mov rdx, rcx
+
+    ret
+
+;----Get player two's health potion count----
+get_play2_health_pot:  
+    mov rcx, player2
+    mov rax, 2
+    mov rbx, 8
+    mul rbx
+    add rcx, rax
+    mov rdx, rcx
+
+    ret
+
+;--------Get the players strength potion count-------------------------------------------------------
+;----!!!Stores the address in RDX!!!----
+
+;----Get player one's strength potion count----
+get_play1_strength_pot:  
+    mov rcx, player1
+    mov rax, 3
+    mov rbx, 8
+    mul rbx
+    add rcx, rax
+    mov rdx, rcx
+
+    ret
+
+;----Get player two's strength potion count----
+get_play2_strength_pot:  
+    mov rcx, player2
+    mov rax, 3
+    mov rbx, 8
+    mul rbx
+    add rcx, rax
+    mov rdx, rcx
 
     ret
 
@@ -441,38 +603,178 @@ switch_player:
     jz set_player2
     jmp set_player1
     
+;--------Drinking a health potion for the current player-------------------------------------------
+;----Health potions doubles the player's current health but won't take it over 100----------------- 
+drink_health:
 
+    ;----checks current player----
+    call get_player
+    mov rax, "player1"
+    cmp rdx, rax
+    jz play1_drink_health
+    jmp play2_drink_health
 
+    ;----health potion for player 1----
+    play1_drink_health:
 
+        ;----Checks if player has a potion----
+        call get_play1_health_pot
+        mov rax, 0
+        cmp [rdx], rax
+        jg use_play1_health_pot
 
+        ;----if no health potions----
+        jmp no_potions
+        
+        ;----sub one from player one's health potions----
+        use_play1_health_pot:
+            call get_play1_health_pot
+            mov rax, 1
+            sub [rdx], rax
 
+            ;----get players health and double it----
+            mov rax, [player1]
+            mov rdx, 2
+            mul rdx
+            mov [player1], rax
 
+            ;----Check if health is over 100----
+            mov rax, [player1]
+            cmp rax, 100
+            jg set_play1_health_max
+            jmp health_cont
+            
+            ;----set health to 100 if over----
+            set_play1_health_max:
+                mov rax, 100
+                mov [player1], rax
+                jmp health_cont
 
+    ;----health potion for player 2----
+    play2_drink_health:
 
+        ;----Checks if player has a potion----
+        call get_play2_health_pot
+        mov rax, 0
+        cmp [rdx], rax
+        jg use_play2_health_pot
 
+        ;----if no health potions----
+        jmp no_potions
+        
+        ;----sub one from player one's health potions----
+        use_play2_health_pot:
+            call get_play2_health_pot
+            mov rax, 1
+            sub [rdx], rax
 
+            ;----get players health and double it----
+            mov rax, [player2]
+            mov rdx, 2
+            mul rdx
+            mov [player2], rax
 
+            ;----Check if health is over 100----
+            mov rax, [player2]
+            cmp rax, 100
+            jg set_play2_health_max
+            jmp health_cont
+            
+            ;----set health to 100 if over----
+            set_play2_health_max:
+                mov rax, 100
+                mov [player2], rax
+                jmp health_cont
 
+    health_cont:
+        jmp check_dead
 
+;--------Drinking a strength potion for the current player-----------------------------------------
+;----Strength potions triple the players attack for their next attack------------------------------
+drink_strength:
 
+    ;----checks current player----
+    call get_player
+    mov rax, "player1"
+    cmp rdx, rax
+    jz play1_drink_strength
+    jmp play2_drink_strength
 
+    ;----strength potion for player 1----
+    play1_drink_strength:
 
+        ;----Checks if player has a potion----
+        call get_play1_strength_pot
+        mov rax, 0
+        cmp [rdx], rax
+        jg use_play1_strength_pot
 
+        ;----if no health potions----
+        jmp no_potions
+        
+        ;----sub one from player one's strength potions----
+        use_play1_strength_pot:
+            call get_play1_strength_pot
+            mov rax, 1
+            sub [rdx], rax
 
+            ;----get players damage and triple it----
+            call get_play1_damage
+            mov rax, [rdx]
+            mov rdx, 3
+            mul rdx
+            push rax
+            call get_play1_damage
+            pop rax
+            mov [rdx], rax
 
+            jmp check_dead
 
+    ;----strength potion for player 2----
+    play2_drink_strength:
 
+        ;----Checks if player has a potion----
+        call get_play2_strength_pot
+        mov rax, 0
+        cmp [rdx], rax
+        jg use_play2_strength_pot
 
+        ;----if no health potions----
+        jmp no_potions
+        
+        ;----sub one from player two's strength potions----
+        use_play2_strength_pot:
+            call get_play2_strength_pot
+            mov rax, 1
+            sub [rdx], rax
 
+            ;----get players damage and triple it----
+            call get_play2_damage
+            mov rax, [rdx]
+            mov rdx, 3
+            mul rdx
+            push rax
+            call get_play2_damage
+            pop rax
+            mov [rdx], rax
 
+            jmp check_dead
 
+    
+;--------If the player has no available potion, say so then go back to the option screen-----------
+no_potions:
 
+    ;----seperator prompt----
+    mov rax, seperator
+    mov rdx, seperator_len
+    call print_string
 
+    ;----no potion prompt----
+    mov rax, no_potion_prompt
+    mov rdx, no_potion_prompt_len
+    call print_string
 
-
-
-
-
+    jmp player_screen
 
 ;--------Checks if the player is dead, if not switch players and go back to screen-----------------
 check_dead:
